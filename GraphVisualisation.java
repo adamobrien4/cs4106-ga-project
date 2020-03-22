@@ -1,3 +1,4 @@
+import java.awt.*;
 import javax.swing.JFrame;
 
 public class GraphVisualisation extends JFrame {
@@ -26,16 +27,22 @@ public class GraphVisualisation extends JFrame {
     public void paint(Graphics g) {
         int radius = 100;
         int mov = 200;
+        int nodeNameAddition = 20;
 
         for(int i = 0; i < numberOfVertices; i++) {
             for(int j = i + 1; j < numberOfVertices; j++) {
                 if(adjacencyMatrix[ordering[i]][ordering[j]] == 1) {
+                    g.setColor(Color.lightGray);
                     g.drawLine(
                         (int) (Math.cos(i * chunk) * radius) + mov,
                         (int) (Math.sin(i * chunk) * radius) + mov,
                         (int) (Math.cos(j * chunk) * radius) + mov,
                         (int) (Math.sin(j * chunk) * radius) + mov
                     );
+
+                    g.setColor(Color.blue);
+                    g.drawString(String.valueOf(i), (int) (Math.cos(i * chunk) * radius) + mov, (int) (Math.sin(i * chunk) * radius) + mov + nodeNameAddition);
+                    g.drawString(String.valueOf(j), (int) (Math.cos(j * chunk) * radius) + mov, (int) (Math.sin(j * chunk) * radius) + mov + nodeNameAddition);
                 }
             }
         }
