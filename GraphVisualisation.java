@@ -3,7 +3,6 @@ import javax.swing.JFrame;
 
 public class GraphVisualisation extends JFrame {
 
-    private static final String TITLE = "Graph Visualisation";
     private static final int WIDTH = 960;
     private static final int HEIGHT = 960;
     private int[][] adjacencyMatrix;
@@ -11,13 +10,13 @@ public class GraphVisualisation extends JFrame {
     private int[] ordering;
     private double chunk;
 
-    public GraphVisualisation(int[][] am, int[] ord, int nv) {
+    public GraphVisualisation(int[][] am, int[] ord, int nv, String title) {
         this.adjacencyMatrix = am;
         this.ordering = ord;
         this.numberOfVertices = nv;
         this.chunk = (Math.PI * 2) / ((double) numberOfVertices);
 
-        setTitle(TITLE);
+        setTitle(title);
         setSize(WIDTH, HEIGHT);
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
