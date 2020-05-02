@@ -31,17 +31,25 @@ public class GraphVisualisation extends JFrame {
         for(int i = 0; i < numberOfVertices; i++) {
             for(int j = i + 1; j < numberOfVertices; j++) {
                 if(adjacencyMatrix[ordering[i]][ordering[j]] == 1) {
+                    int x1 = (int) (Math.cos(i * chunk) * radius) + mov;
+                    int y1 = (int) (Math.sin(i * chunk) * radius) + mov;
+                    int x2 = (int) (Math.cos(j * chunk) * radius) + mov;
+                    int y2 = (int) (Math.sin(j * chunk) * radius) + mov;
                     g.setColor(Color.lightGray);
                     g.drawLine(
-                        (int) (Math.cos(i * chunk) * radius) + mov,
-                        (int) (Math.sin(i * chunk) * radius) + mov,
-                        (int) (Math.cos(j * chunk) * radius) + mov,
-                        (int) (Math.sin(j * chunk) * radius) + mov
+                        x1,
+                        y1,
+                        x2,
+                        y2
                     );
 
                     g.setColor(Color.blue);
-                    g.drawString(String.valueOf(i), (int) (Math.cos(i * chunk) * radius) + mov, (int) (Math.sin(i * chunk) * radius) + mov + nodeNameAddition);
-                    g.drawString(String.valueOf(j), (int) (Math.cos(j * chunk) * radius) + mov, (int) (Math.sin(j * chunk) * radius) + mov + nodeNameAddition);
+                    g.drawArc(x1, y1, 5, 5, 0, 360);
+                    g.drawArc(x2, y2, 5, 5, 0, 360);
+
+                    g.setColor(Color.blue);
+                    g.drawString(String.valueOf(ordering[i]), x1, y1 + nodeNameAddition);
+                    g.drawString(String.valueOf(ordering[j]), x2, y2 + nodeNameAddition);
                 }
             }
         }

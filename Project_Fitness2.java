@@ -1,13 +1,13 @@
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 import javax.swing.*;
 
-class Project {
+class Project_Fitness2 {
     private int numberOfVertices;
     private int[][] adjacencyMatrix;
 
@@ -73,8 +73,8 @@ class Project {
         // String str_cr = "";
         // String str_mu = "";
 
-        String str_p = "250";
-        String str_g = "100";
+        String str_p = "50";
+        String str_g = "25";
         String str_cr = "40";
         String str_mu = "40";
 
@@ -177,7 +177,6 @@ class Project {
 
             // Empty out any fitnesses from last generation
             currentPopulationFitnesses.clear();
-            currentPopulation.clear();
 
             // Step 4 - Generate first population
             if (generation == 0) {
@@ -225,12 +224,31 @@ class Project {
             // _print("CurrentPopulation for generation : " + generation);
             printOrderings(currentPopulation);
 
+            // Scaled fitness according to algorithm
+            double f_worst = 0.0;
+
             // Generate the current populations fitness
             for (int i = 0; i < populationSize; i++) {
-                currentPopulationFitnesses.put(i, fitnessFunction(currentPopulation.get(i)));
+                double f = fitnessFunction(currentPopulation.get(i));
+                currentPopulationFitnesses.put(i, f);
 
+                // If the fitness for the current ordering is higher than the previous worst update the value of the worst fitness value
+                if(f > f_worst) {
+                    f_worst = f;
+                }
+
+                // TODO : Uncomment to view every ordering in the generation be displayed
                 //new GraphVisualisation(adjacencyMatrix,
                 //currentPopulation.get(i), numberOfVertices, "Ordering " + (i) + " -> " + currentPopulationFitnesses.get(i) );
+            }
+
+            // Update the fitness values to the scaled versions
+            for (int i = 0; i < populationSize; i++) {
+                double f = currentPopulationFitnesses.get(i);
+                currentPopulationFitnesses.put(i, (f_worst - f));
+
+                // System.out.println("Previous fitness for ordering : " + i + " is " + f);
+                // System.out.println("Scaled fitness for ordering : " + i + " is " + (f_worst - f));
             }
 
             // // _print("CurrentPopulation Fitness for generation : " + generation);
@@ -252,22 +270,14 @@ class Project {
             // _print("RankedOrderingIndexes for generation : " + generation);
             // _print("Ordering Index -> Ordering -> Ordering Fitness");
             for(int i = 0; i < rankedOrderingIndexes.length; i++){
-                _print(rankedOrderingIndexes[i] + " -> " + Arrays.toString(currentPopulation.get((int)rankedOrderingIndexes[i])) + " -> " + currentPopulationFitnesses.get(rankedOrderingIndexes[i]));
+                // _print(rankedOrderingIndexes[i] + " -> " + Arrays.toString(currentPopulation.get((int)rankedOrderingIndexes[i])) + " -> " + currentPopulationFitnesses.get(rankedOrderingIndexes[i]));
             }
             //// _print(Arrays.toString(rankedOrderingIndexes));
 
             // Printing the last generations best ordering to the screen
-            if((generation+1) % 5 == 0){
-                try {
-                    TimeUnit.MILLISECONDS.sleep(50);
-                } catch (Exception e) {
+            //new GraphVisualisation(adjacencyMatrix,
+            //currentPopulation.get((int) rankedOrderingIndexes[0]), numberOfVertices, "Best Ordering for Generation : " + (generation+1) + " -> " + currentPopulationFitnesses.get(rankedOrderingIndexes[0]) );
 
-                }
-                System.out.println("Printing best matrix");
-                new GraphVisualisation(adjacencyMatrix,
-                currentPopulation.get((int) rankedOrderingIndexes[0]), numberOfVertices, "Best Ordering for Generation : " + generation + " -> " + currentPopulationFitnesses.get(rankedOrderingIndexes[0]) );
-            }
-            
             ArrayList<Integer> s1 = new ArrayList<>();
             ArrayList<Integer> s2 = new ArrayList<>();
             ArrayList<Integer> s3 = new ArrayList<>();
@@ -313,10 +323,20 @@ class Project {
             // _print("ResultingOrderings for generation : " + generation);
             // _print(Arrays.toString(resultingOrderings.toArray()));
 
+            boolean bestOrderingMoved = false;
+
             // Step 5 (b)
             while (resultingOrderings.size() > 0) {
 
                 // System.out.println("Size : " + resultingOrderings.size());
+
+                if(!bestOrderingMoved) {
+                    // Move the best ordering to the next generation unchanged
+                    nextPopulation.put(nextPopulation.size(), currentPopulation.get(resultingOrderings.get(0)));
+                    resultingOrderings.remove(0);
+                    bestOrderingMoved = true;
+                    continue;
+                }
 
                 int probabilityRate = rand.nextInt(100);
 
@@ -402,10 +422,10 @@ class Project {
                     // _print("Fixing newOrdering2");
                     replaceDuplicate(newOrdering2);
 
-                    // System.out.print("newOrdering1 after fix : ");
+                    System.out.print("newOrdering1 after fix : ");
                     // System.out.println(Arrays.toString(newOrdering1));
 
-                    // System.out.print("newOrdering2 after fix : ");
+                    System.out.print("newOrdering2 after fix : ");
                     // System.out.println(Arrays.toString(newOrdering2));
 
                     // Add newOrderings to next population
@@ -491,7 +511,7 @@ class Project {
                 }
 
                 new GraphVisualisation(adjacencyMatrix,
-                nextPopulation.get(lowestFitnessIndex), numberOfVertices, "Final Generation Best Ordering -> " + lowestFitnessScore);
+                currentPopulation.get(lowestFitnessIndex), numberOfVertices, "Final Generation Best Ordering -> " + lowestFitnessScore);
             }
         }
 
@@ -578,7 +598,7 @@ class Project {
     }
 
     private void _print(String s) {
-        // System.out.println(s);
+        System.out.println(s);
     }
 
     private void printOrderings(HashMap<Integer, int[]> arr) {
@@ -588,11 +608,11 @@ class Project {
     }
 }
 
-class EdgeListItem {
-    public int[] entries = new int[2];
+// class EdgeListItem {
+//     public int[] entries = new int[2];
 
-    public EdgeListItem(int a, int b){
-        entries[0] = a;
-        entries[1] = b;
-    }
-}
+//     public EdgeListItem(int a, int b){
+//         entries[0] = a;
+//         entries[1] = b;
+//     }
+// }
