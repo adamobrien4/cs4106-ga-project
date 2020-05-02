@@ -18,7 +18,7 @@ class Project {
         ArrayList<EdgeListItem> edgeListData = new ArrayList<>();
 
         try {
-            File myObj = new File("input_old.txt");
+            File myObj = new File("input.txt");
             Scanner myReader = new Scanner(myObj);
 
             while (myReader.hasNextLine()) {
@@ -56,37 +56,41 @@ class Project {
 
         // System.out.println("Orderings have " + numberOfVertices + "vertices.");
 
-        // System.out.println("Adjacency Matrix : ");
+        System.out.println("Adjacency Matrix : ");
         for(int i = 0; i < numberOfVertices; i++){
             for(int j = 0; j < numberOfVertices; j++){
                 System.out.print(adjacencyMatrix[i][j] + ", ");
             }
-            // System.out.println("");
+            System.out.println("");
         }
 
         f = new JFrame();
 
-        // TODO : Update revert strings to original values.
+        String str_p = "";
+        String str_g = "";
+        String str_cr = "";
+        String str_mu = "";
+        String str_bo = "";
 
-        // String str_p = "";
-        // String str_g = "";
-        // String str_cr = "";
-        // String str_mu = "";
+        //String str_p = "250";
+        //String str_g = "100";
+        //String str_cr = "40";
+        //String str_mu = "40";
 
-        String str_p = "250";
-        String str_g = "100";
-        String str_cr = "40";
-        String str_mu = "40";
+        boolean p_valid = false,
+                g_valid = false,
+                cr_valid = false,
+                mu_valid = false,
+                bo_valid = false;
 
-        // boolean p_valid = false,
-        //         g_valid = false,
-        //         cr_valid = false,
-        //         mu_valid = false;
-
+        /*
         boolean p_valid = true,
                 g_valid = true,
                 cr_valid = true,
                 mu_valid = true;
+        */
+
+        int bo = 0;
 
         while(!p_valid){
             str_p = JOptionPane.showInputDialog(f, "Population Size:");
@@ -161,6 +165,26 @@ class Project {
             JOptionPane.showMessageDialog(f, "Mutation Rate must be between 0 and 100", "Invalid Input", JOptionPane.WARNING_MESSAGE);
         }
 
+        while(!bo_valid){
+            str_bo = JOptionPane.showInputDialog(f, "Print best ordering every n generations (0 = only print solution ordering):");
+
+            if(str_bo.length() > 0){
+                try {
+                    double d = Double.parseDouble(str_bo);
+
+                    if(d>=0){
+                        bo_valid = true;
+                        bo = Integer.parseInt(str_bo);
+                        continue;
+                    }
+                    continue;
+                } catch (NumberFormatException nfe) {
+                    // Invalid
+                }
+            }
+            JOptionPane.showMessageDialog(f, "n must be a number", "Invalid Input", JOptionPane.WARNING_MESSAGE);
+        }
+
         HashMap<Integer, Double> currentPopulationFitnesses = new HashMap<>();
 
         // Step 2 - User Input
@@ -206,13 +230,6 @@ class Project {
 
                     // Add newOrdering to currentPopulation
                     currentPopulation.put(i, newOrdering);
-
-                    // Print newOrdering to console
-                    // System.out.print("Ordering " + i + ": ");
-                    // // System.out.println(Arrays.toString(newOrdering));
-                    // // System.out.println("Fitness Score : " + currentPopulationFitnesses.get(i));
-                    // // System.out.println("");
-
                 }
             } else {
                 nextPopulation.entrySet().forEach(entry -> {
@@ -228,13 +245,7 @@ class Project {
             // Generate the current populations fitness
             for (int i = 0; i < populationSize; i++) {
                 currentPopulationFitnesses.put(i, fitnessFunction(currentPopulation.get(i)));
-
-                //new GraphVisualisation(adjacencyMatrix,
-                //currentPopulation.get(i), numberOfVertices, "Ordering " + (i) + " -> " + currentPopulationFitnesses.get(i) );
             }
-
-            // // _print("CurrentPopulation Fitness for generation : " + generation);
-            // printOrderings(currentPopulationFitnesses, 1);
 
             // Step 5 - Fitness Sort
 
@@ -249,32 +260,27 @@ class Project {
             // amount current orderings
             Object[] rankedOrderingIndexes = sortedOrderings.keySet().toArray();
 
-            // _print("RankedOrderingIndexes for generation : " + generation);
-            // _print("Ordering Index -> Ordering -> Ordering Fitness");
             for(int i = 0; i < rankedOrderingIndexes.length; i++){
                 _print(rankedOrderingIndexes[i] + " -> " + Arrays.toString(currentPopulation.get((int)rankedOrderingIndexes[i])) + " -> " + currentPopulationFitnesses.get(rankedOrderingIndexes[i]));
             }
-            //// _print(Arrays.toString(rankedOrderingIndexes));
 
             // Printing the last generations best ordering to the screen
-            if((generation+1) % 5 == 0){
-                try {
-                    TimeUnit.MILLISECONDS.sleep(50);
-                } catch (Exception e) {
-
+            if(bo > 0 ){
+                if((generation % bo) == 0){
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(50);
+                    } catch (Exception e) {
+    
+                    }
+                    new GraphVisualisation(adjacencyMatrix,
+                    currentPopulation.get((int) rankedOrderingIndexes[0]), numberOfVertices, "Best Ordering for Generation : " + generation + " -> " + currentPopulationFitnesses.get(rankedOrderingIndexes[0]) );
                 }
-                System.out.println("Printing best matrix");
-                new GraphVisualisation(adjacencyMatrix,
-                currentPopulation.get((int) rankedOrderingIndexes[0]), numberOfVertices, "Best Ordering for Generation : " + generation + " -> " + currentPopulationFitnesses.get(rankedOrderingIndexes[0]) );
             }
+            
             
             ArrayList<Integer> s1 = new ArrayList<>();
             ArrayList<Integer> s2 = new ArrayList<>();
             ArrayList<Integer> s3 = new ArrayList<>();
-
-            // _print("s1 : " + s1.size());
-            // _print("s2 : " + s2.size());
-            // _print("s3 : " + s3.size());
 
             // This piece of code ensures that s1 and s3 are the same size
             // E.g. if lenght = 5, s1 = 2 elements, s2 = 1 element and s3 = 2 elements also
@@ -290,13 +296,10 @@ class Project {
             for (int i = 0; i < populationSize; i++) {
                 if (i < s1s3len) {
                     s1.add((int) rankedOrderingIndexes[i]);
-                    // System.out.println("Adding : " + Arrays.toString(currentPopulation.get(rankedOrderingIndexes[i])) + " to s1");
                 } else if (i > populationSize - s1s3len - 1) {
                     s3.add((int) rankedOrderingIndexes[i]);
-                    // System.out.println("Adding : " + Arrays.toString(currentPopulation.get(rankedOrderingIndexes[i])) + " to s3");
                 } else {
                     s2.add((int) rankedOrderingIndexes[i]);
-                    // System.out.println("Adding : " + Arrays.toString(currentPopulation.get(rankedOrderingIndexes[i])) + " to s2");
                 }
             }
 
@@ -310,13 +313,8 @@ class Project {
             resultingOrderings.addAll(s2);
             resultingOrderings.addAll(s1);
 
-            // _print("ResultingOrderings for generation : " + generation);
-            // _print(Arrays.toString(resultingOrderings.toArray()));
-
             // Step 5 (b)
             while (resultingOrderings.size() > 0) {
-
-                // System.out.println("Size : " + resultingOrderings.size());
 
                 int probabilityRate = rand.nextInt(100);
 
@@ -334,42 +332,15 @@ class Project {
                         p2 = rand.nextInt(resultingOrderings.size());
                     }
 
-                    // _print("--Size : " + resultingOrderings.size());
-                    // _print("--p1 : " + p1);
-                    // _print("--p2 : " + p2);
-
                     // Crossover parent orderings
                     int[] ordering1 = currentPopulation.get(resultingOrderings.get(p1));
                     int[] ordering2 = currentPopulation.get(resultingOrderings.get(p2));
-
-                    // _print("Ordering 1");
-                    // _print(Arrays.toString(ordering1));
-                    // _print("Ordering 2");
-                    // _print(Arrays.toString(ordering2));
-
-                    // // System.out.println("ProbabilityRate : " + probabilityRate);
-                    // // System.out.println("CrossoverRate : " + crossoverRate);
 
                     int[] newOrdering1 = new int[numberOfVertices];
                     int[] newOrdering2 = new int[numberOfVertices];
 
                     // p1 = parent 1 index, p2 = parent 2 index
                     int cuttingPoint = rand.nextInt(numberOfVertices - 3) + 1;
-
-                    // // System.out.println("Parent 1 : " + p1);
-                    // // System.out.println("Parent 2 : " + p2);
-                    // System.out.println("CuttingPoint : " + cuttingPoint);
-
-                    // // System.out.println("ordering1");
-                    for (int i = 0; i < ordering1.length; i++) {
-                        // System.out.print(ordering1[i] + " , ");
-                    }
-                    // // System.out.println("ordering2");
-                    for (int i = 0; i < ordering2.length; i++) {
-                        // System.out.print(ordering2[i] + " , ");
-                    }
-
-                    // _print("Ordering1 : " + Arrays.toString(ordering1));
 
                     // Split parent orderings
                     int[] p1_p1 = Arrays.copyOfRange(ordering1, 0, cuttingPoint);
@@ -378,35 +349,16 @@ class Project {
                     int[] p2_p1 = Arrays.copyOfRange(ordering2, 0, cuttingPoint);
                     int[] p2_p2 = Arrays.copyOfRange(ordering2, cuttingPoint, numberOfVertices);
 
-                    // _print("p1_p1 -> " + Arrays.toString(p1_p1));
-                    // _print("p1_p2 -> " + Arrays.toString(p1_p2));
-
-                    // _print("p2_p1 -> " + Arrays.toString(p2_p1));
-                    // _print("p2_p2 -> " + Arrays.toString(p2_p2));
-
-                    // _print("Ordering2 : " + Arrays.toString(ordering2));
-
                     // Make newOrdering1
                     System.arraycopy(p1_p1, 0, newOrdering1, 0, cuttingPoint);
                     System.arraycopy(p2_p2, 0, newOrdering1, cuttingPoint, p2_p2.length);
 
                     System.arraycopy(p2_p1, 0, newOrdering2, 0, cuttingPoint);
                     System.arraycopy(p1_p2, 0, newOrdering2, cuttingPoint, p1_p2.length);
-                    
-                    // _print("newOrdering1 -> " + Arrays.toString(newOrdering1));
-                    // _print("newOrdering2 -> " + Arrays.toString(newOrdering2));
 
                     // Replace missing or duplicate
-                    // _print("Fixing newOrdering1");
                     replaceDuplicate(newOrdering1);
-                    // _print("Fixing newOrdering2");
                     replaceDuplicate(newOrdering2);
-
-                    // System.out.print("newOrdering1 after fix : ");
-                    // System.out.println(Arrays.toString(newOrdering1));
-
-                    // System.out.print("newOrdering2 after fix : ");
-                    // System.out.println(Arrays.toString(newOrdering2));
 
                     // Add newOrderings to next population
                     nextPopulation.put(nextPopulation.size(), newOrdering1);
@@ -423,7 +375,6 @@ class Project {
                     }
                 }
 
-                // _print(crossoverRate +"<="+ probabilityRate +"&& ("+probabilityRate+" <= ("+(crossoverRate + mutationRate)+")");
 
                 // Mutation
                 if ((crossoverRate <= probabilityRate) && (probabilityRate <= (crossoverRate + mutationRate))
@@ -433,9 +384,6 @@ class Project {
 
                     int r_index = rand.nextInt(resultingOrderings.size());
                     int[] o = currentPopulation.get(r_index);
-
-                    // _print("Applying mutation to ordering " + r_index + " : Original");
-                    // _print(Arrays.toString(o));
 
                     int r1 = rand.nextInt(numberOfVertices);
                     int r2 = 1;
@@ -449,23 +397,15 @@ class Project {
                     o[r1] = o[r2];
                     o[r2] = t;
 
-                    // _print("Swapping indexes : " + r1 + " -> " + r2);
-
-                    // _print("Resulting ordering:");
-                    // _print(Arrays.toString(o));
-
                     // Add new ordering to nextPopulation
                     nextPopulation.put(nextPopulation.size(), o);
                     // Remove ordering from array
                     resultingOrderings.remove(r_index);
                 }
 
-                // _print(probabilityRate + " -> Probability Rate");
-
                 // Reproduction
                 if ( probabilityRate > (mutationRate + crossoverRate) && resultingOrderings.size() >= 1 ) {
                     int r_index = rand.nextInt(resultingOrderings.size());
-                    // _print("Applying Reproduction to ordering at index " + r_index );
 
                     nextPopulation.put(nextPopulation.size(), currentPopulation.get(r_index));
 
@@ -487,22 +427,12 @@ class Project {
                         lowestFitnessIndex = i;
                         lowestFitnessScore = fitnessValue;
                     }
-                    // _print("i : " + fitnessValue);
                 }
 
                 new GraphVisualisation(adjacencyMatrix,
                 nextPopulation.get(lowestFitnessIndex), numberOfVertices, "Final Generation Best Ordering -> " + lowestFitnessScore);
             }
         }
-
-        // // System.out.println("\n\nNext Population");
-        for (int i = 0; i < nextPopulation.size(); i++) {
-            // // System.out.println(Arrays.toString(nextPopulation.get(i)));
-        }
-
-        // Print the ordering with the best score
-        //GraphVisualisation gv = new GraphVisualisation(adjacencyMatrix,
-        //currentPopulation.get((int) rankedOrderingIndexes[0]), numberOfVertices);
     }
 
     // Calculates the length of all lines for the requested ordering (closer to 0 is
@@ -569,7 +499,6 @@ class Project {
 
         for(int i = 0; i < exists.length; i++){
             if(!exists[i]) {
-                // _print("Replacing index " + dupLoc.get(0) + " with a number " + i);
                 ordering[dupLoc.get(0)] = i;
                 dupLoc.remove(0);
                 exists[i] = true;
